@@ -258,6 +258,10 @@ void Environment::InitializeDiagnostics() {
   if (options_->trace_uncaught)
     isolate_->SetCaptureStackTraceForUncaughtExceptions(true);
   if (options_->trace_atomics_wait) {
+    ProcessEmitDeprecationWarning(
+        Environment::GetCurrent(isolate_),
+        "The flag --trace-atomics-wait is deprecated.",
+        "DEP0165");
     isolate_->SetAtomicsWaitCallback(AtomicsWaitCallback, this);
     AddCleanupHook([](void* data) {
       Environment* env = static_cast<Environment*>(data);
@@ -865,13 +869,20 @@ static ExitCode InitializeNodeWithArgsInternal(
 
   if (!file_paths.empty()) {
     CHECK(!per_process::v8_initialized);
-    auto cwd = Environment::GetCwd(Environment::GetExecPath(*argv));
 
     for (const auto& file_path : file_paths) {
-      std::string path = cwd + kPathSeparator + file_path;
-      auto path_exists = per_process::dotenv_file.ParsePath(path);
-
-      if (!path_exists) errors->push_back(file_path + ": not found");
+      switch (per_process::dotenv_file.ParsePath(file_path)) {
+        case Dotenv::ParseResult::Valid:
+          break;
+        case Dotenv::ParseResult::InvalidContent:
+          errors->push_back(file_path + ": invalid format");
+          break;
+        case Dotenv::ParseResult::FileError:
+          errors->push_back(file_path + ": not found");
+          break;
+        default:
+          UNREACHABLE();
+      }
     }
 
     per_process::dotenv_file.AssignNodeOptionsIfAvailable(&node_options);

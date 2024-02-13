@@ -35,6 +35,7 @@ using v8::IntegrityLevel;
 using v8::Isolate;
 using v8::Local;
 using v8::MaybeLocal;
+using v8::MemorySpan;
 using v8::MicrotaskQueue;
 using v8::Module;
 using v8::ModuleRequest;
@@ -89,7 +90,7 @@ Local<Context> ModuleWrap::context() const {
   // If this fails, there is likely a bug e.g. ModuleWrap::context() is accessed
   // before the ModuleWrap constructor completes.
   CHECK(obj->IsObject());
-  return obj.As<Object>()->GetCreationContext().ToLocalChecked();
+  return obj.As<Object>()->GetCreationContextChecked();
 }
 
 ModuleWrap* ModuleWrap::GetFromModule(Environment* env,
@@ -120,7 +121,7 @@ void ModuleWrap::New(const FunctionCallbackInfo<Value>& args) {
   Local<Context> context;
   ContextifyContext* contextify_context = nullptr;
   if (args[1]->IsUndefined()) {
-    context = that->GetCreationContext().ToLocalChecked();
+    context = that->GetCreationContextChecked();
   } else {
     CHECK(args[1]->IsObject());
     contextify_context = ContextifyContext::ContextFromContextifiedSandbox(
@@ -170,8 +171,10 @@ void ModuleWrap::New(const FunctionCallbackInfo<Value>& args) {
         export_names[i] = export_name_val.As<String>();
       }
 
-      module = Module::CreateSyntheticModule(isolate, url, export_names,
-        SyntheticModuleEvaluationStepsCallback);
+      const MemorySpan<const Local<String>> span(export_names.begin(),
+                                                 export_names.size());
+      module = Module::CreateSyntheticModule(
+          isolate, url, span, SyntheticModuleEvaluationStepsCallback);
     } else {
       ScriptCompiler::CachedData* cached_data = nullptr;
       if (!args[5]->IsUndefined()) {
@@ -598,6 +601,7 @@ static MaybeLocal<Promise> ImportModuleDynamically(
       id,
       Local<Value>(specifier),
       attributes,
+      resource_name,
   };
 
   Local<Value> result;

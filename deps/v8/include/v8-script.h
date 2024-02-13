@@ -16,6 +16,7 @@
 #include "v8-data.h"          // NOLINT(build/include_directory)
 #include "v8-local-handle.h"  // NOLINT(build/include_directory)
 #include "v8-maybe.h"         // NOLINT(build/include_directory)
+#include "v8-memory-span.h"   // NOLINT(build/include_directory)
 #include "v8-message.h"       // NOLINT(build/include_directory)
 #include "v8config.h"         // NOLINT(build/include_directory)
 
@@ -285,9 +286,14 @@ class V8_EXPORT Module : public Data {
    * module_name is used solely for logging/debugging and doesn't affect module
    * behavior.
    */
+  V8_DEPRECATE_SOON("Please use the version that takes a MemorySpan")
   static Local<Module> CreateSyntheticModule(
       Isolate* isolate, Local<String> module_name,
       const std::vector<Local<String>>& export_names,
+      SyntheticModuleEvaluationSteps evaluation_steps);
+  static Local<Module> CreateSyntheticModule(
+      Isolate* isolate, Local<String> module_name,
+      const MemorySpan<const Local<String>>& export_names,
       SyntheticModuleEvaluationSteps evaluation_steps);
 
   /**
@@ -388,6 +394,27 @@ class V8_EXPORT ScriptCompiler {
     CachedData(const uint8_t* data, int length,
                BufferPolicy buffer_policy = BufferNotOwned);
     ~CachedData();
+
+    enum CompatibilityCheckResult {
+      // Don't change order/existing values of this enum since it keys into the
+      // `code_cache_reject_reason` histogram. Append-only!
+      kSuccess = 0,
+      kMagicNumberMismatch = 1,
+      kVersionMismatch = 2,
+      kSourceMismatch = 3,
+      kFlagsMismatch = 5,
+      kChecksumMismatch = 6,
+      kInvalidHeader = 7,
+      kLengthMismatch = 8,
+      kReadOnlySnapshotChecksumMismatch = 9,
+
+      // This should always point at the last real enum value.
+      kLast = kReadOnlySnapshotChecksumMismatch
+    };
+
+    // Check if the CachedData can be loaded in the given isolate.
+    CompatibilityCheckResult CompatibilityCheck(Isolate* isolate);
+
     // TODO(marja): Async compilation; add constructors which take a callback
     // which will be called when V8 no longer needs the data.
     const uint8_t* data;

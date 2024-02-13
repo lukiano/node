@@ -1593,6 +1593,36 @@ $ node negate.js --no-logfile --logfile=test.log --color --no-color
 { logfile: 'test.log', color: false }
 ```
 
+## `util.parseEnv(content)`
+
+> Stability: 1.1 - Active development
+
+<!-- YAML
+added: REPLACEME
+-->
+
+* `content` {string}
+
+The raw contents of a `.env` file.
+
+* Returns: {Object}
+
+Given an example `.env` file:
+
+```cjs
+const { parseEnv } = require('node:util');
+
+parseEnv('HELLO=world\nHELLO=oh my\n');
+// Returns: { HELLO: 'oh my' }
+```
+
+```mjs
+import { parseEnv } from 'node:util';
+
+parseEnv('HELLO=world\nHELLO=oh my\n');
+// Returns: { HELLO: 'oh my' }
+```
+
 ## `util.promisify(original)`
 
 <!-- YAML
@@ -2838,25 +2868,6 @@ Returns `true` if the value is a built-in [`WeakSet`][] instance.
 util.types.isWeakSet(new WeakSet());  // Returns true
 ```
 
-### `util.types.isWebAssemblyCompiledModule(value)`
-
-<!-- YAML
-added: v10.0.0
-deprecated: v14.0.0
--->
-
-> Stability: 0 - Deprecated: Use `value instanceof WebAssembly.Module` instead.
-
-* `value` {any}
-* Returns: {boolean}
-
-Returns `true` if the value is a built-in [`WebAssembly.Module`][] instance.
-
-```js
-const module = new WebAssembly.Module(wasmBuffer);
-util.types.isWebAssemblyCompiledModule(module);  // Returns true
-```
-
 ## Deprecated APIs
 
 The following APIs are deprecated and should no longer be used. Existing
@@ -3362,7 +3373,6 @@ util.log('Timestamped message.');
 [`Uint8ClampedArray`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray
 [`WeakMap`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap
 [`WeakSet`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet
-[`WebAssembly.Module`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Module
 [`assert.deepStrictEqual()`]: assert.md#assertdeepstrictequalactual-expected-message
 [`console.error()`]: console.md#consoleerrordata-args
 [`mime.toString()`]: #mimetostring

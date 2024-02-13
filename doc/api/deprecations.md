@@ -3313,6 +3313,9 @@ Values other than `undefined`, `null`, integer numbers, and integer strings
 
 <!-- YAML
 changes:
+  - version: REPLACEME
+    pr-url: https://github.com/nodejs/node/pull/51179
+    description: Runtime deprecation.
   - version:
     - v18.8.0
     - v16.18.0
@@ -3320,9 +3323,11 @@ changes:
     description: Documentation-only deprecation.
 -->
 
-Type: Documentation-only
+Type: Runtime
 
-The [`--trace-atomics-wait`][] flag is deprecated.
+The [`--trace-atomics-wait`][] flag is deprecated because
+it uses the V8 hook `SetAtomicsWaitCallback`,
+that will be removed in a future V8 release.
 
 ### DEP0166: Double slashes in imports and exports targets
 
@@ -3522,7 +3527,12 @@ deprecated. Get them from `fs.constants` or `fs.promises.constants` instead.
 
 <!-- YAML
 changes:
-  - version: v21.3.0
+  - version: REPLACEME
+    pr-url: https://github.com/nodejs/node/pull/51442
+    description: End-of-Life.
+  - version:
+    - v21.3.0
+    - v20.11.0
     pr-url: https://github.com/nodejs/node/pull/50486
     description: A deprecation code has been assigned.
   - version: v14.0.0
@@ -3530,16 +3540,16 @@ changes:
     description: Documentation-only deprecation.
 -->
 
-Type: Documentation-only
+Type: End-of-Life
 
-The [`util.types.isWebAssemblyCompiledModule`][] API is deprecated. Please use
-`value instanceof WebAssembly.Module` instead.
+The `util.types.isWebAssemblyCompiledModule` API has been removed.
+Please use `value instanceof WebAssembly.Module` instead.
 
 ### DEP0178: `dirent.path`
 
 <!-- YAML
 changes:
-  - version: REPLACEME
+  - version: v21.5.0
     pr-url: https://github.com/nodejs/node/pull/51020
     description: Documentation-only deprecation.
 -->
@@ -3553,7 +3563,7 @@ release lines. Please use [`dirent.parentPath`][] instead.
 
 <!-- YAML
 changes:
-  - version: REPLACEME
+  - version: v21.5.0
     pr-url: https://github.com/nodejs/node/pull/51077
     description: Documentation-only deprecation.
 -->
@@ -3708,7 +3718,6 @@ Please use the [`crypto.createHash()`][] method to create Hash instances.
 [`util.log()`]: util.md#utillogstring
 [`util.promisify`]: util.md#utilpromisifyoriginal
 [`util.toUSVString()`]: util.md#utiltousvstringstring
-[`util.types.isWebAssemblyCompiledModule`]: util.md#utiltypesiswebassemblycompiledmodulevalue
 [`util.types`]: util.md#utiltypes
 [`util`]: util.md
 [`worker.exitedAfterDisconnect`]: cluster.md#workerexitedafterdisconnect
